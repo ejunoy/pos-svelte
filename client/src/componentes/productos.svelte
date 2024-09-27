@@ -4,8 +4,10 @@
     import Accordion, {Panel, Header, Content} from "@smui-extra/accordion";
     import Button, {Label} from "@smui/button";
     import Dialog, { Title, Actions } from '@smui/dialog';
-    import Autocomplete from '@smui-extra/autocomplete';
     import Textfield from '@smui/textfield';
+    import IconButton, { Icon } from '@smui/icon-button';
+    import {toast, Toaster} from 'svelte-french-toast';
+
 
 
     const url = "https://pos-svelte-server.vercel.app"
@@ -14,17 +16,46 @@
     let productos = [];
     let nombresProductos = [];
     let preciosProductos =[];
+    let openPanel = false;
 
     let nuevoProducto = {nombre: "", precio: 0};
     let productoModificado = {nombre: "", precio: 0};
 
+    let productoSeleccionado;
+
+    function productoEliminado(){
+        toast.success("El producto ha sido eliminado");
+    }
+
+    function productoCreado(){
+        toast.success("El producto ha sido creado");
+    }
+
+    function errorProductoExiste(){
+        toast.error("El producto ya existe");
+    }
+
+    function productoEditado(){
+        toast.success("El producto ha sido editado");
+    }
+
     async function editarProducto(producto, productoModificado){
-        const response = await axios.patch(url+"/productos/"+producto._id, productoModificado)
-        await obtenerProductos();
+        if(producto.nombre != productoModificado.nombre || producto.precio != productoModificado.precio){
+            const response = await axios.patch(url+"/productos/"+producto._id, productoModificado)
+            if(response.data==="El producto ya existe"){
+                errorProductoExiste();
+            }else{
+                productoEditado();
+            }
+        }else{
+            productoEditado();
+        }
+        await obtenerProductos();   
     }
 
     async function eliminarProducto(id){
         const response = await axios.delete(url+"/productos/"+id)
+        productoEliminado();
         await obtenerProductos();
     }
 
@@ -45,8 +76,13 @@
     
 
     async function crearProducto(){
-        console.log(nuevoProducto)
         const response = await axios.post(url+"/productos", nuevoProducto)
+        console.log(response.data)
+        if(response.data==="El producto ya existe"){
+            errorProductoExiste();
+        }else{
+            productoCreado();
+        }
         await obtenerProductos();
     }
 
@@ -55,36 +91,57 @@
 
 <div class="contenedorAcordeon">
 <Accordion>
-{#each productos as producto}
+    {#each productos as producto (producto._id)}
     <Panel>
-        <Header>Producto: {producto.nombre}</Header>
-        <Content> Nombre: {producto.nombre} <br> Precio: {producto.precio}</Content>
-        <Dialog bind:open={openEditar} id="ediarPopup">
-            <Title>Editar Producto</Title>
-            <Content id="textoDialogo">
-                <Label>
-                    <h3>Nombre:</h3>
-                </Label>
-                <Textfield variant="outlined" bind:value={productoModificado.nombre} label="Nombre" type="text" />
-                <Label>
-                    <h3>Precio:</h3>
-                </Label>
-                <Textfield variant="outlined" bind:value={productoModificado.precio} label="Precio" type="number" input$min="0.01" input$max="1000000"/>
-            </Content>
-            
-            <Actions>
-                <Button on:click={()=>editarProducto(producto, productoModificado)} variant="raised">
-                    <Label>Guardar</Label>
-                </Button>
-                <Button variant="raised">
-                    <Label>Cancelar</Label>
-                </Button>
-            </Actions>
-        </Dialog>
-        <Button on:click = {() => openEditar=true}>
+        <Header>
+            Producto: {producto.nombre}
+            <IconButton slot="icon" toggle pressed={openPanel}>
+                <Icon class="material-icons" on>expand_less</Icon>
+                <Icon class="material-icons">expand_more</Icon>
+            </IconButton>
+        </Header>
+        <Content> 
+            Nombre: {producto.nombre} <br> 
+            Precio: {producto.precio} 
+        </Content>
+
+        {#if producto.isEditing}
+            <Dialog bind:open={producto.isEditing} id="editarPopup">
+                <Title>Editar Producto</Title>
+                <Content id="textoDialogo">
+                    <Label>
+                        <h3>Nombre:</h3>
+                    </Label>
+                    <Textfield variant="outlined" bind:value={productoModificado.nombre} label="Nombre" type="text" />
+                    <Label>
+                        <h3>Precio:</h3>
+                    </Label>
+                    <Textfield variant="outlined" bind:value={productoModificado.precio} label="Precio" type="number" input$min="0.01" input$max="1000000"/>
+                </Content>
+                
+                <Actions>
+                    <Button on:click={() => {
+                        editarProducto(producto, productoModificado);
+                        producto.isEditing = false;
+                    }} variant="raised">
+                        <Label>Guardar</Label>
+                    </Button>
+                    <Button on:click={() => producto.isEditing = false} variant="raised">
+                        <Label>Cancelar</Label>
+                    </Button>
+                </Actions>
+            </Dialog>
+        {/if}
+
+        <Button on:click={() => {
+            productoModificado.nombre = producto.nombre;
+            productoModificado.precio = producto.precio;
+
+            producto.isEditing = true;
+        }}>
             <Label>Editar</Label>
         </Button>
-        <Button on:click = {() => eliminarProducto(producto._id) }>
+        <Button on:click={() => eliminarProducto(producto._id)}>
             <Label>Eliminar</Label>
         </Button>
     </Panel>
@@ -118,6 +175,7 @@
     <Label>Crear producto</Label>
 </Button>
 </div>
+<Toaster/>
 
 <style>
     :global(#textoDialogo){

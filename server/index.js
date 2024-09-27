@@ -40,7 +40,7 @@ app.post("/productos", async (req,res)=>{
         await nuevoProducto.save();
         res.json(nuevoProducto);
     }catch(err){
-        res.json(err)
+        res.json("El producto ya existe")
     }
 })
 
@@ -61,7 +61,7 @@ app.patch("/productos/:id", async (req, res) => {
         const updatedProduct = await ProductoModel.findByIdAndUpdate(id, body);
         res.json(updatedProduct);
     } catch (err) {
-        res.json(err);
+        res.json("El producto ya existe");
     }
 });
 

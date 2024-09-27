@@ -16,6 +16,7 @@
 		"@smui-extra/autocomplete": "^7.0.0",
 		"@smui/button": "^7.0.0",
 		"@smui/dialog": "^7.0.0",
+		"@smui/icon-button": "^7.0.0",
 		"@smui/tab": "^7.0.0",
 		"@smui/tab-bar": "^7.0.0",
 		"@smui/textfield": "^7.0.0",
@@ -28,6 +29,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"axios": "^1.7.7"
+		"axios": "^1.7.7",
+		"svelte-french-toast": "^1.2.0"
 	}
 }
