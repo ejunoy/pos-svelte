@@ -8,7 +8,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: ['http://localhost:5174','http://localhost:5173', "https://pos-svelte-server.vercel.app"]
+    origin: ['http://localhost:5174','http://localhost:5173', "https://pos-svelte-client.vercel.app"]
 }));
 app.use(express.json());
 
@@ -43,6 +43,27 @@ app.post("/productos", async (req,res)=>{
         res.json(err)
     }
 })
+
+app.delete("/productos/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const deletedProduct = await ProductoModel.findByIdAndDelete(id);
+        res.json(deletedProduct);
+    } catch (err) {
+        res.json(err);
+    }
+});
+
+app.patch("/productos/:id", async (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+    try {
+        const updatedProduct = await ProductoModel.findByIdAndUpdate(id, body);
+        res.json(updatedProduct);
+    } catch (err) {
+        res.json(err);
+    }
+});
 
 app.listen(3000, () => {
     console.log("Server is running");
