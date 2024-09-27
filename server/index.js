@@ -16,3 +16,7 @@ mongoose.connect("mongodb+srv://emiliojunoy:Madeinmexico2001@cluster0.p7jiu.mong
 app.get("/", (req, res) => {
     res.json("hola");
 });
+
+app.listen(3000, () => {
+    console.log("Server is running");
+});
