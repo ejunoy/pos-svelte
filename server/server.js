@@ -9,3 +9,10 @@ app.use(cors({
     origin: ['http://localhost:8080']
 }));
 app.use(express.json());
+
+mongoose.connect("mongodb+srv://emiliojunoy:Madeinmexico2001@cluster0.p7jiu.mongodb.net/POS?retryWrites=true&w=majority&appName=Cluster0");
+
+
+app.get("/", (req, res) => {
+    res.json("hola");
+});
