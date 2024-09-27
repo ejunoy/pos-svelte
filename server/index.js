@@ -6,7 +6,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: ['http://localhost:8080', "https://pos-svelte-server.vercel.app/"]
+    origin: ['http://localhost:8080', "https://pos-svelte-server.vercel.app"]
 }));
 app.use(express.json());
 
