@@ -22,7 +22,7 @@
     import Cuentas from "../../../componentes/cuentas.svelte";
     let active = "Productos"
     
-    //const url = "https://pos-svelte-server.vercel.app"
-    const url= "http://localhost:3000"
+    const url = "https://pos-svelte-server.vercel.app"
+    //const url= "http://localhost:3000"
     
 </script>
