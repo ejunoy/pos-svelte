@@ -9,6 +9,9 @@
 
 {#if active === "Productos"}
     <Productos/>
+
+{:else if active === "Cuentas"}
+    <Cuentas/>
 {/if}
 
 
@@ -16,6 +19,7 @@
     import Tab, {Label} from "@smui/tab";
     import TabBar from "@smui/tab-bar";
     import Productos from "../componentes/productos.svelte";
+    import Cuentas from "../componentes/cuentas.svelte";
     let active = "Productos"
 
 </script>

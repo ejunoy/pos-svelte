@@ -16,12 +16,11 @@
     let productos = [];
     let nombresProductos = [];
     let preciosProductos =[];
-    let openPanel = false;
+    let openPanels = [];
 
     let nuevoProducto = {nombre: "", precio: 0};
     let productoModificado = {nombre: "", precio: 0};
 
-    let productoSeleccionado;
 
     function productoEliminado(){
         toast.success("El producto ha sido eliminado");
@@ -66,13 +65,16 @@
             nombresProductos= [...nombresProductos, productos[i].nombre];
             preciosProductos = [...preciosProductos, productos[i].precio]
         }
+        return productos
     }
 
     onMount(async ()=>{
-        await obtenerProductos()
+        const productos =await obtenerProductos()
+        for(let producto of productos){
+            openPanels = [...openPanels, false]
+        }
     })
     let openDialog = false;
-    let openEditar = false;
     
 
     async function crearProducto(){
@@ -90,12 +92,13 @@
 
 
 <div class="contenedorAcordeon">
+
 <Accordion>
-    {#each productos as producto (producto._id)}
+    {#each productos as producto, index (producto._id)}
     <Panel>
         <Header>
             Producto: {producto.nombre}
-            <IconButton slot="icon" toggle pressed={openPanel}>
+            <IconButton slot="icon" toggle pressed={()=> openPanels[index]= !openPanels[index]}>
                 <Icon class="material-icons" on>expand_less</Icon>
                 <Icon class="material-icons">expand_more</Icon>
             </IconButton>
