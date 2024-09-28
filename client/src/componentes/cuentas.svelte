@@ -8,8 +8,8 @@
     import IconButton, { Icon } from '@smui/icon-button';
     import Autocomplete from '@smui-extra/autocomplete';
 
-    //const url = "https://pos-svelte-server.vercel.app"
-    const url = "http://localhost:3000";
+    const url = "https://pos-svelte-server.vercel.app"
+    //const url = "http://localhost:3000";
 
     let cuentas = [];  // This will store all the cuentas
     let productosCuenta = {};  // This will store the product information per cuenta
