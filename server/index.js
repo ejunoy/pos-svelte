@@ -11,7 +11,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: ['http://localhost:5174/pos','http://localhost:5173/pos', "https://pos-svelte-client.vercel.app/pos"]
+    origin: ['http://localhost:5174','http://localhost:5173', "https://pos-svelte-client.vercel.app"]
 }));
 app.use(express.json());
 
@@ -158,11 +158,10 @@ app.get("/cuentas", async (req,res)=>{
 
 app.post("/cuentas", async (req,res)=>{
     const body = req.body;
-    const productos = body.productos;
     const propina = body.propina;
     try{
         const nuevaCuenta = new CuentaModel({
-            productos: productos,  
+            productos: [],  
             propina: propina
         })
         await nuevaCuenta.save();
@@ -202,6 +201,24 @@ app.patch("/cuentas/:id/:idProducto", async (req, res) => {
     }
     
 });
+
+app.patch("/cuentas/:id", async (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+    const propina = body.propina;
+    try {
+        const cuenta = await CuentaModel.findById(id);
+        await CuentaModel.findByIdAndUpdate(id, {propina: propina});
+        res.json(cuenta);
+    } catch (err) {
+        res.json(err);
+    }
+    
+});
+
+app.post("/cuentas/:id", async (req, res) => {
+    const id = req.params.id;
+})
 
 app.listen(3000, () => {
     console.log("Server is running");

@@ -8,10 +8,10 @@
 </div>
 
 {#if active === "Productos"}
-    <Productos/>
+    <Productos url={url}/>
 
 {:else if active === "Cuentas"}
-    <Cuentas/>
+    <Cuentas url={url}/>
 {/if}
 
 
@@ -21,5 +21,8 @@
     import Productos from "../../../componentes/productos.svelte";
     import Cuentas from "../../../componentes/cuentas.svelte";
     let active = "Productos"
-
+    
+    //const url = "https://pos-svelte-server.vercel.app"
+    const url= "http://localhost:3000"
+    
 </script>

@@ -8,10 +8,7 @@
     import IconButton, { Icon } from '@smui/icon-button';
     import {toast, Toaster} from 'svelte-french-toast';
 
-
-
-    const url = "https://pos-svelte-server.vercel.app"
-    //const url= "http://localhost:3000"
+    export let url;
     
     let productos = [];
     let nombresProductos = [];

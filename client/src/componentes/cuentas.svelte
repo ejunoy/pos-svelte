@@ -8,8 +8,7 @@
     import IconButton, { Icon } from '@smui/icon-button';
     import Autocomplete from '@smui-extra/autocomplete';
 
-    const url = "https://pos-svelte-server.vercel.app"
-    //const url = "http://localhost:3000";
+    export let url;
 
     let cuentas = [];  // This will store all the cuentas
     let productosCuenta = {};  // This will store the product information per cuenta
@@ -22,9 +21,79 @@
     let productosPrecios = [];
 
 
+
+    //Cobrar cuenta
+    async function cobrarCuenta(cuenta) {
+        const productos = cuenta.productos;
+        let productosCobrados = [];
+        let totalCuenta =0;
+        for(let producto of productos){
+            const response = await fetchProducto(producto);
+            const productoCobrado = {nombre: response.producto.nombre, precio: response.producto.precio, cantidad: response.cantidad, total: response.producto.precio*response.cantidad}
+            productosCobrados = [...productosCobrados, productoCobrado];
+            totalCuenta += productoCobrado.total
+        }
+        const win = window.open("", "", "height=700, width=400");
+        win.document.write("<html><head><title>Recibo</title></head><body>");
+        win.document.write("<h1 style='text-align: center;'>Recibo</h1>");
+
+        // Start the table with centered text
+        win.document.write("<table style='width: 100%; text-align: center; border-collapse: collapse;'>");
+
+        // Add the table header
+        win.document.write(`
+        <thead>
+            <tr>
+            <th style='border-bottom: 1px solid black; padding: 10px;'>Producto</th>
+            <th style='border-bottom: 1px solid black; padding: 10px;'>Cantidad</th>
+            <th style='border-bottom: 1px solid black; padding: 10px;'>Precio</th>
+            <th style='border-bottom: 1px solid black; padding: 10px;'>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        `);
+
+        // Loop through productosCobrados and add a row for each product
+        for (let producto of productosCobrados) {
+            win.document.write(`
+            <tr>
+                <td style='padding: 10px;'>${producto.nombre}</td>
+                <td style='padding: 10px;'>${producto.cantidad}</td>
+                <td style='padding: 10px;'>$${producto.precio}</td>
+                <td style='padding: 10px;'>$${producto.total}</td>
+            </tr>
+            `);
+        }
+
+        // Close the table body
+        win.document.write("</tbody></table>");
+
+        // Add a horizontal line to separate the total
+        win.document.write("<hr style='margin: 20px 0;'>");
+
+        // Display the total amount
+        win.document.write(`
+        <p style='text-align: right; font-weight: bold; font-size: 18px;'>
+            Total productos:$${totalCuenta}<br>
+            Propina: $${(cuenta.propina*0.01*totalCuenta).toFixed(2)}<br>
+            Total: $${(totalCuenta + cuenta.propina*0.01*totalCuenta).toFixed(2)}
+        </p>
+        `);
+
+        // Close the HTML
+        win.document.write("</body></html>");
+        win.document.close();
+        win.print();
+    }
+
+    //Agregar propina 
+    async function agregarPropina(cuentaId, propina) {
+        const response = await axios.patch(url + "/cuentas/" + cuentaId, { propina: propina });
+        return response.data
+    }
     // Crear cuenta
     async function crearCuenta() {
-        await axios.post(url + "/cuentas");
+        await axios.post(url + "/cuentas", {propina: 0});
         await actualizarCuentas(); // Re-fetch and update cuentas
     }
 
@@ -191,9 +260,7 @@
                             {/each}
                         {/if}
                     </Accordion>
-                    {#if cuenta.propina}
-                        <p>Propina: {cuenta.propina}</p>
-                    {/if}
+                    <p>Propina: {cuenta.propina}%</p>
                     <Dialog bind:open={cuenta.agregando} id="editarPopup">
                         <Title>Agregar producto</Title>
                         <Content id="textoDialogo">
@@ -257,6 +324,49 @@
                         await eliminarCuenta(cuenta._id);
                     }}>
                         <Label>Eliminar cuenta</Label>
+                    </Button>
+
+                    <Dialog bind:open={cuenta.agregandoPropina} id="propinaPopup">
+                        <Title>Agregar propina</Title>
+                        <Content id="textoDialogo">
+                            <Label><h3>Propina</h3></Label>
+                            <Textfield
+                                variant="outlined"
+                                bind:value={cuenta.propina}
+                                label="Cantidad"
+                                type="number"
+                                input$min="0"
+                                input$max="100"
+                            />
+                        </Content>
+                        <Actions>
+                            <Button
+                                variant="raised"
+                                on:click={async () => {
+                                    await agregarPropina(cuenta._id, cuenta.propina);
+                                    cuenta.agregandoPropina = false;  // Close the dialog
+                                    cuentas = [...cuentas];  // Trigger reactivity
+                                }}
+                            >
+                                <Label>Guardar</Label>
+                            </Button>
+                            <Button
+                                variant="raised"
+                                on:click={() => {
+                                    cuenta.agregando = false;  // Close the dialog
+                                    cuentas = [...cuentas];  // Trigger reactivity
+                                }}
+                            >
+                                <Label>Cancelar</Label>
+                            </Button>
+                        </Actions>
+                    </Dialog>
+                    
+                    <Button on:click={()=>cuenta.agregandoPropina = true}>
+                        <Label>Agregar propina</Label>
+                    </Button>
+                    <Button on:click={() => cobrarCuenta(cuenta)}>
+                        <Label>Cobrar cuenta</Label>
                     </Button>
                 </Content>
             </Panel>
