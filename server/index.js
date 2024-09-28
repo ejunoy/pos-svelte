@@ -11,7 +11,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: ['http://localhost:5174','http://localhost:5173', "https://pos-svelte-client.vercel.app"]
+    origin: ['http://localhost:5174/pos','http://localhost:5173/pos', "https://pos-svelte-client.vercel.app/pos"]
 }));
 app.use(express.json());
 
