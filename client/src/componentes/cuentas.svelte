@@ -32,6 +32,8 @@
             const productoCobrado = {nombre: response.producto.nombre, precio: response.producto.precio, cantidad: response.cantidad, total: response.producto.precio*response.cantidad}
             productosCobrados = [...productosCobrados, productoCobrado];
             totalCuenta += productoCobrado.total
+            const responseVendido =await axios.post(url+"/productosVendidos", {producto:response.producto._id, cantidad: response.cantidad});
+            console.log(responseVendido)
         }
         const win = window.open("", "", "height=700, width=400");
         win.document.write("<html><head><title>Recibo</title></head><body>");

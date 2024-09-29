@@ -6,6 +6,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const ProductoCuentaModelo = require("./models/ProductosCuenta.js");
+const ProductoVendidoModel = require("./models/ProductosVendidos.js");
 
 const app = express();
 const PORT = 3000;
@@ -26,6 +27,16 @@ app.get("/productos", async (req, res) => {
     try {
         const productos = await ProductoModel.find({});
         res.json(productos);
+    } catch (err) {
+        res.json(err);
+    }
+});
+
+app.get("/productos/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const producto = await ProductoModel.findById(id);
+        res.json(producto);
     } catch (err) {
         res.json(err);
     }
@@ -216,9 +227,34 @@ app.patch("/cuentas/:id", async (req, res) => {
     
 });
 
-app.post("/cuentas/:id", async (req, res) => {
-    const id = req.params.id;
+
+//Productos vendidos 
+
+app.post("/productosVendidos", async (req, res) => {
+    const body = req.body;
+    try {
+        const nuevoProductoVendido = new ProductoVendidoModel({
+            producto: body.producto,
+            cantidad: body.cantidad,
+        });
+        await nuevoProductoVendido.save();
+        res.json(nuevoProductoVendido);
+    } catch (err) {
+        res.json(err);
+    }
 })
+
+app.get("/productosVendidos", async (req, res) => {
+    try {
+        const ProductosVendidos = await ProductoVendidoModel.find({});
+        res.json(ProductosVendidos);
+    } catch (err) {
+        res.json(err);
+    }
+});
+
+
+
 
 app.listen(3000, () => {
     console.log("Server is running");
