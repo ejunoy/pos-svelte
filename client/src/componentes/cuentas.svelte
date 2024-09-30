@@ -331,7 +331,7 @@
                     <Dialog bind:open={cuenta.agregandoPropina} id="propinaPopup">
                         <Title>Agregar propina</Title>
                         <Content id="textoDialogo">
-                            <Label><h3>Propina</h3></Label>
+                            <Label><h3>Propina (%)</h3></Label>
                             <Textfield
                                 variant="outlined"
                                 bind:value={cuenta.propina}

@@ -8,6 +8,11 @@
     let vendidos = [];
     let ingresosHoy = 0;
     let ingresosAyer = 0;
+    let ingresosSemana = 0;
+    let ingresosMes = 0;
+    let ingresosMesPasado = 0;
+    let ingresosSemanaPasada = 0;
+    let ingresosTotal = 0;
 
     // Calcular ingresos
     function ingresos(lista) {
@@ -16,6 +21,17 @@
             total += vendido.cantidad * vendido.precio;
         }
         return total;
+    }
+
+    //Filtrar por nombre
+    async function filtrarNombre(lista, nombre) {
+        let productos = [];
+        for (let vendido of lista) {
+            if (vendido.nombre === nombre) {
+                productos = [...productos, vendido];
+            }
+        }
+        return productos;
     }
 
     // Filtrar por fecha
@@ -60,95 +76,160 @@
         ingresosHoy = ingresos(productosHoy);
 
         const productosAyer = await filtrarFecha(vendidos, moment().tz("America/Mexico_City").subtract(1, "days").startOf("day"), moment().tz("America/Mexico_City").subtract(1, "days").endOf("day"));
-        ingresosAyer = ingresos(productosAyer);
+        ingresosAyer = ingresos(productosAyer)
+
+        const productosMes = await filtrarFecha(vendidos, moment().tz("America/Mexico_City").startOf("month"), moment().tz("America/Mexico_City").endOf("month"));
+        ingresosMes = ingresos(productosMes);
+
+        const productosMesPasado = await filtrarFecha(vendidos, moment().tz("America/Mexico_City").subtract(1, "month").startOf("month"), moment().tz("America/Mexico_City").subtract(1, "month").endOf("month"));
+        ingresosMesPasado = ingresos(productosMesPasado);
+
+        const productosSemana = await filtrarFecha(vendidos, moment().tz("America/Mexico_City").startOf("week"), moment().tz("America/Mexico_City").endOf("week"));
+        ingresosSemana = ingresos(productosSemana);
+
+        const productosSemanaPasada = await filtrarFecha(vendidos, moment().tz("America/Mexico_City").subtract(1, "week").startOf("week"), moment().tz("America/Mexico_City").subtract(1, "week").endOf("week"));
+        ingresosSemanaPasada = ingresos(productosSemanaPasada);
+
+        ingresosTotal = ingresos(vendidos);
+
     });
 </script>
 
 <style>
-    .contenedorIngresos {
-        display: flex;
-        flex-direction: row; /* Display items in a row */
-        justify-content: space-between; /* Space items evenly */
-        align-items: center; /* Align items vertically in the center */
-        width: 100%; /* Ensure the container spans the full width */
-        padding: 20px; /* Add padding to the container */
-        gap: 20px; /* Add gap between each section */
-    }
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
 
-    .income-section {
-        flex: 1; /* Make sections flexible so they take up equal space */
-        text-align: center;
-    }
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    border-top: 2px solid white;
+}
 
-    .income-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
+th {
+    background-color: black;
+    color: white;
+    font-weight: bold;
+}
 
-    .income-amount-green {
-        font-size: 1.25rem;
-        color: #4CAF50; /* Green color for positive comparison */
-    }
+td {
+    background-color: black;
+    color: white;
+    position: relative; /* Needed for the tooltip positioning */
+    overflow: visible; /* Ensure the tooltip isn't clipped */
+}
 
-    .income-amount-red {
-        font-size: 1.25rem;
-        color: red; /* Red color for negative comparison */
-    }
+colgroup {
+    border-right: 2px solid white;
+}
 
-    .error-message {
-        color: red;
-    }
+.income-amount-green {
+    color: #4CAF50;
+}
+
+.income-amount-red {
+    color: red;
+}
+
+
+.tooltip {
+    display: none; /* Initially hidden */
+    background-color: white;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 10;
+    top: 50%;
+    left: 60%;
+    transform: translateY(-50%);
+    width: max-content;
+    white-space: nowrap;
+    border: 1px solid #ddd;
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* Arrow to the left */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent white transparent transparent;
+}
+
+/* Display the tooltip on hover */
+td:hover .tooltip {
+    display: block; /* Force tooltip to display on hover */
+}
+
 </style>
 
 <div class="contenedorEstadisticas">
     <h1 style="text-align: center;">Estadísticas</h1>
-    <div class="contenedorIngresos">
-        <!-- Ingresos Totales -->
-        <div class="income-section">
-            <h3 class="income-title">Ingresos Totales</h3>
-            <h3 class="income-amount">$ {ingresos(vendidos)}</h3>
-        </div>
-        
-        <!-- Ingresos Hoy with dynamic color based on comparison with Ayer -->
-        <div class="income-section">
-            <h3 class="income-title">Ingresos Hoy</h3>
-            {#await filtrarFecha(vendidos, moment().tz("America/Mexico_City").startOf("day"), moment().tz("America/Mexico_City").endOf("day")) then productosHoy}
-                <h3 class={ingresosHoy >= ingresosAyer ? 'income-amount-green' : 'income-amount-red'}>
+    <table>
+        <colgroup>
+            <col span="1" style="border-right: 2px solid white;">
+            <col span="1" style="border-right: 2px solid white;">
+        </colgroup>
+
+        <thead>
+            <tr>
+                <th style="background-color: lightblue; color: black">Ingresos</th>
+                <th style="background-color: pink; color: black">Monto</th>
+                <th style="background-color: lightyellow; color: black">Promedio (por día)</th> <!-- New column for mean -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Hoy</td>
+                <td>
                     $ {ingresosHoy}
-                </h3>
-            {:catch error}
-                <h3 class="error-message">Error: {error.message}</h3>
-            {/await}
-        </div>
-
-        <!-- Ingresos Ayer -->
-        <div class="income-section">
-            <h3 class="income-title">Ingresos Ayer</h3>
-            {#await filtrarFecha(vendidos, moment().tz("America/Mexico_City").subtract(1, "days").startOf("day"), moment().tz("America/Mexico_City").subtract(1, "days").endOf("day")) then productosAyer}
-                <h3 class="income-amount">$ {ingresosAyer}</h3>
-            {:catch error}
-                <h3 class="error-message">Error: {error.message}</h3>
-            {/await}
-        </div>
-
-        <!-- Ingresos Mes -->
-        <div class="income-section">
-            <h3 class="income-title">Ingresos Mes</h3>
-            {#await filtrarFecha(vendidos, moment().tz("America/Mexico_City").startOf("month"), moment().tz("America/Mexico_City").endOf("month")) then productosMes}
-                <h3 class="income-amount">$ {ingresos(productosMes)}</h3>
-            {:catch error}
-                <h3 class="error-message">Error: {error.message}</h3>
-            {/await}
-        </div>
-
-        <!-- Ingresos semana -->
-        <div class="income-section">
-            <h3 class="income-title">Ingresos Semana</h3>
-            {#await filtrarFecha(vendidos, moment().tz("America/Mexico_City").startOf("week"), moment().tz("America/Mexico_City").endOf("week")) then productosSemana}
-                <h3 class="income-amount">$ {ingresos(productosSemana)}</h3>
-            {:catch error}
-                <h3 class="error-message">Error: {error.message}</h3>
-            {/await}
-        </div>
-    </div>
+                    <div class="tooltip" style="color: {ingresosHoy >= ingresosAyer ? 'green' : 'red'}">
+                        {ingresosHoy >= ingresosAyer ? '+' : '-'} $ {ingresosHoy - ingresosAyer}
+                    </div>
+                </td>
+                <td> <!-- Mean sales for "Hoy" -->
+                    $ {(ingresosHoy / 1).toFixed(2)} <!-- Assuming "Hoy" is a single day -->
+                </td>
+            </tr>
+            <tr>
+                <td>Semana</td>
+                <td>
+                    $ {ingresosSemana}
+                    <div class="tooltip" style="color: {ingresosSemana >= ingresosSemanaPasada ? 'green' : 'red'}">
+                        {ingresosSemana >= ingresosSemanaPasada ? '+' : '-'} $ {ingresosSemana - ingresosSemanaPasada}
+                    </div>
+                </td>
+                <td> <!-- Mean sales for "Semana" -->
+                    $ {(ingresosSemana / 7).toFixed(2)} <!-- Assuming 7 days in a week -->
+                </td>
+            </tr>
+            <tr>
+                <td>Mes</td>
+                <td>
+                    $ {ingresosMes}
+                    <div class="tooltip" style="color: {ingresosMes >= ingresosMesPasado ? 'green' : 'red'}">
+                        {ingresosMes >= ingresosMesPasado ? '+' : '-'} $ {ingresosMes - ingresosMesPasado}
+                    </div>
+                </td>
+                <td> <!-- Mean sales for "Mes" -->
+                    $ {(ingresosMes / 30).toFixed(2)} <!-- Assuming 30 days in a month -->
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: lightgray; color: black">TOTAL</td>
+                <td>
+                    $ {ingresosTotal}
+                </td>
+                <td> <!-- Mean sales for "Total" -->
+                     <!-- Calculate based on total days available -->
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
