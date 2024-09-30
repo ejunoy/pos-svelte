@@ -22,6 +22,10 @@
     let cantidadesSemana = [];
     let nombresMes = [];
     let cantidadesMes = [];
+    let topVendidos = []
+    let topVendidosDia = []
+    let topVendidosSemana = []
+    let topVendidosMes = []
 
     // Calcular ingresos
     function ingresos(lista) {
@@ -68,6 +72,26 @@
         const response = await axios.get(url + "/productos/" + id);
         return response.data;
     }
+
+     // Sort products by quantity and return top 5
+     function calcularTopVendidos(vendidos) {
+        const productQuantities = {};
+
+        // Sum quantities by product name
+        for (let vendido of vendidos) {
+            if (!productQuantities[vendido.nombre]) {
+                productQuantities[vendido.nombre] = 0;
+            }
+            productQuantities[vendido.nombre] += vendido.cantidad;
+        }
+
+        // Convert the object into an array and sort by quantity
+        const sortedProducts = Object.entries(productQuantities).sort((a, b) => b[1] - a[1]);
+
+        // Get the top 5 products
+        return sortedProducts.slice(0, 5);
+    }
+
 
     // Fetch data and calculate incomes
     onMount(async () => {
@@ -157,8 +181,10 @@
             cantidadesMes = [...cantidadesMes, total];
         }
 
-        console.log(cantidadesDia)
-        console.log(nombresDia)
+        topVendidos = calcularTopVendidos(vendidos);
+        topVendidosDia = calcularTopVendidos(productosHoy);
+        topVendidosSemana = calcularTopVendidos(productosSemana);
+        topVendidosMes = calcularTopVendidos(productosMes);
     });
 </script>
 
@@ -226,14 +252,28 @@ td:hover .tooltip {
     display: block; /* Force tooltip to display on hover */
 }
 
+.contenedorEstadisticas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    margin: 10%;
+}
+
 </style>
 
 <div class="contenedorEstadisticas">
     <h1 style="text-align: center;">Estadísticas</h1>
     <table>
         <colgroup>
+            <col span="1" style="border-left: 2px solid white; border-right: 2px solid white;">
             <col span="1" style="border-right: 2px solid white;">
             <col span="1" style="border-right: 2px solid white;">
+            
+            
+            
+
         </colgroup>
 
         <thead>
@@ -292,40 +332,157 @@ td:hover .tooltip {
         </tbody>
     </table>
 </div>
-<div class="contenedorEstadisticas" style="width: 50%; height: 25%; align-items: center; display: flex; flex-direction:row; align-items: center; margin-left: 25%">
+
+<!-- Estadisticas totales -->
+<div class="contenedorEstadisticas" style="width: 50%; height: 30% align-content: center">
     {#if nombresTotal.length >0}
         {#if cantidadesTotal.length >0}
-            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
                 <h2 style="text-align: center;">Total</h2>
                 <Barras id="myBarChartTotal" labels = {nombresTotal} data = {cantidadesTotal}/>
-            </div>
-        {/if}
-    {/if}
-    {#if nombresDia.length >0}
-        {#if cantidadesDia.length >0}
-            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
-                <h2 style="text-align: center;">Hoy</h2>
-                <Barras id="myBarChartDia" labels = {nombresDia} data = {cantidadesDia}/>
-            </div>
         {/if}
     {/if}
 </div>
 
-<div class="contenedorEstadisticas" style="width: 50%; height: 25%; align-items: center; display: flex; flex-direction:row; align-items: center; margin-left: 25%">
-    {#if nombresSemana.length >0}
-        {#if cantidadesSemana.length >0}
-            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
-                <h2 style="text-align: center;">Semana</h2>
-                <Barras id="myBarChartSemana" labels = {nombresSemana} data = {cantidadesSemana}/>
-            </div>
+
+<div class="contenedorEstadisticas">
+    <h2 style="text-align: center;">Top 5 productos</h2>
+    {#if topVendidos.length > 0}
+        <table>
+            <colgroup>
+                <col span="1" style="border-right: 2px solid white; border-left: 2px solid white;">
+                <col span="1" style="border-right: 2px solid white;">
+
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="background-color: #8ecae6; color: black">Producto</th>
+                    <th style="background-color: #219ebc; color: black">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each topVendidos as [nombre, cantidad]}
+                    <tr>
+                        <td>{nombre}</td>
+                        <td>{cantidad}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
+</div>
+
+<!-- Estadisticas por dia -->
+<div class="contenedorEstadisticas" style="width: 50%; height: 30%">
+    {#if nombresDia.length >0}
+        {#if cantidadesDia.length >0}
+                <h2 style="text-align: center;">Hoy</h2>
+                <Barras id="myBarChartDia" labels = {nombresDia} data = {cantidadesDia}/>
         {/if}
     {/if}
+</div>
+
+
+
+<div class="contenedorEstadisticas">
+    <h2 style="text-align: center;">Top 5 productos hoy</h2>
+    {#if topVendidos.length > 0}
+        <table>
+            <colgroup>
+                <col span="1" style="border-right: 2px solid white; border-left: 2px solid white;">
+                <col span="1" style="border-right: 2px solid white;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="background-color: #8ecae6; color: black">Producto</th>
+                    <th style="background-color: #219ebc; color: black">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each topVendidosDia as [nombre, cantidad]}
+                    <tr>
+                        <td>{nombre}</td>
+                        <td>{cantidad}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
+</div>
+
+<!-- Estadisticas por semana -->
+
+<div class="contenedorEstadisticas" style="width: 50%; height: 30%">
+    {#if nombresSemana.length >0}
+        {#if cantidadesSemana.length >0}
+                <h2 style="text-align: center;">Semana</h2>
+                <Barras id="myBarChartSemana" labels = {nombresSemana} data = {cantidadesSemana}/>
+        {/if}
+    {/if}
+</div>
+
+
+
+<div class="contenedorEstadisticas">
+    <h2 style="text-align: center;">Top 5 productos de la semana</h2>
+    {#if topVendidos.length > 0}
+        <table>
+            <colgroup>
+                <col span="1" style="border-right: 2px solid white; border-left: 2px solid white;">
+                <col span="1" style="border-right: 2px solid white;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="background-color: #8ecae6; color: black">Producto</th>
+                    <th style="background-color: #219ebc; color: black">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each topVendidosSemana as [nombre, cantidad]}
+                    <tr>
+                        <td>{nombre}</td>
+                        <td>{cantidad}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
+</div>
+
+<!-- Estadisticas por mes -->
+
+<div class="contenedorEstadisticas" style="width: 50%; height: 30%">
+    
     {#if nombresMes.length >0}
         {#if cantidadesMes.length >0}
-            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
                 <h2 style="text-align: center;">Mes</h2>
                 <Barras id="myBarChartMes" labels = {nombresMes} data = {cantidadesMes}/>
-            </div>
         {/if}
+    {/if}
+</div>
+
+
+
+<div class="contenedorEstadisticas">
+    <h2 style="text-align: center;">Top 5 productos del mes</h2>
+    {#if topVendidos.length > 0}
+        <table>
+            <colgroup>
+                <col span="1" style="border-right: 2px solid white; border-left: 2px solid white;">
+                <col span="1" style="border-right: 2px solid white;">            </colgroup>
+            <thead>
+                <tr>
+                    <th style="background-color: #8ecae6; color: black">Producto</th>
+                    <th style="background-color: #219ebc; color: black">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each topVendidosMes as [nombre, cantidad]}
+                    <tr>
+                        <td>{nombre}</td>
+                        <td>{cantidad}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
     {/if}
 </div>
