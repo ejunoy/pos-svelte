@@ -238,9 +238,9 @@ td:hover .tooltip {
 
         <thead>
             <tr>
-                <th style="background-color: lightblue; color: black">Ingresos</th>
-                <th style="background-color: pink; color: black">Monto</th>
-                <th style="background-color: lightyellow; color: black">Promedio (por día)</th> <!-- New column for mean -->
+                <th style="background-color: #8ecae6; color: black">Ingresos</th>
+                <th style="background-color: #219ebc; color: black">Monto</th>
+                <th style="background-color: #fb8500; color: black">Promedio (por día)</th> <!-- New column for mean -->
             </tr>
         </thead>
         <tbody>
@@ -281,7 +281,7 @@ td:hover .tooltip {
                 </td>
             </tr>
             <tr>
-                <td style="font-weight: bold; background-color: lightgray; color: black">TOTAL</td>
+                <td style="font-weight: bold; background-color: #023047; color: white">TOTAL</td>
                 <td>
                     $ {ingresosTotal}
                 </td>
