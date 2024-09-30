@@ -2,6 +2,7 @@
     import axios from "axios";
     import { onMount } from "svelte";
     import moment from "moment-timezone";
+    import Barras from "../componentes/Barras.svelte";
 
     export let url;
 
@@ -13,6 +14,14 @@
     let ingresosMesPasado = 0;
     let ingresosSemanaPasada = 0;
     let ingresosTotal = 0;
+    let nombresTotal = [];
+    let cantidadesTotal = [];
+    let nombresDia = [];
+    let cantidadesDia = [];
+    let nombresSemana = [];
+    let cantidadesSemana = [];
+    let nombresMes = [];
+    let cantidadesMes = [];
 
     // Calcular ingresos
     function ingresos(lista) {
@@ -91,7 +100,65 @@
         ingresosSemanaPasada = ingresos(productosSemanaPasada);
 
         ingresosTotal = ingresos(vendidos);
+        
 
+        for(let vendido of vendidos){
+            if(!nombresTotal.includes(vendido.nombre)){
+                nombresTotal = [...nombresTotal, vendido.nombre];
+            }
+            if(!nombresDia.includes(vendido.nombre)){
+                nombresDia = [...nombresDia, vendido.nombre];
+            }
+            if(!nombresSemana.includes(vendido.nombre)){
+                nombresSemana = [...nombresSemana, vendido.nombre];
+            }
+            if(!nombresMes.includes(vendido.nombre)){
+                nombresMes = [...nombresMes, vendido.nombre];
+            }
+        }
+
+        for(let nombre of nombresTotal){
+            let total = 0;
+            for(let vendido of vendidos){
+                if(vendido.nombre === nombre){
+                    total = total + vendido.cantidad;
+                }
+            }
+            cantidadesTotal = [...cantidadesTotal, total];
+        }
+
+        for(let nombre of nombresDia){
+            let total = 0;
+            for(let vendido of vendidos){
+                if(vendido.nombre === nombre){
+                    total = total + vendido.cantidad;
+                }
+            }
+            cantidadesDia = [...cantidadesDia, total];
+        }
+
+        for(let nombre of nombresSemana){
+            let total = 0;
+            for(let vendido of vendidos){
+                if(vendido.nombre === nombre){
+                    total = total + vendido.cantidad;
+                }
+            }
+            cantidadesSemana = [...cantidadesSemana, total];
+        }
+
+        for(let nombre of nombresMes){
+            let total = 0;
+            for(let vendido of vendidos){
+                if(vendido.nombre === nombre){
+                    total = total + vendido.cantidad;
+                }
+            }
+            cantidadesMes = [...cantidadesMes, total];
+        }
+
+        console.log(cantidadesDia)
+        console.log(nombresDia)
     });
 </script>
 
@@ -124,14 +191,6 @@ td {
 
 colgroup {
     border-right: 2px solid white;
-}
-
-.income-amount-green {
-    color: #4CAF50;
-}
-
-.income-amount-red {
-    color: red;
 }
 
 
@@ -232,4 +291,41 @@ td:hover .tooltip {
             </tr>
         </tbody>
     </table>
+</div>
+<div class="contenedorEstadisticas" style="width: 50%; height: 25%; align-items: center; display: flex; flex-direction:row; align-items: center; margin-left: 25%">
+    {#if nombresTotal.length >0}
+        {#if cantidadesTotal.length >0}
+            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
+                <h2 style="text-align: center;">Total</h2>
+                <Barras id="myBarChartTotal" labels = {nombresTotal} data = {cantidadesTotal}/>
+            </div>
+        {/if}
+    {/if}
+    {#if nombresDia.length >0}
+        {#if cantidadesDia.length >0}
+            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
+                <h2 style="text-align: center;">Hoy</h2>
+                <Barras id="myBarChartDia" labels = {nombresDia} data = {cantidadesDia}/>
+            </div>
+        {/if}
+    {/if}
+</div>
+
+<div class="contenedorEstadisticas" style="width: 50%; height: 25%; align-items: center; display: flex; flex-direction:row; align-items: center; margin-left: 25%">
+    {#if nombresSemana.length >0}
+        {#if cantidadesSemana.length >0}
+            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
+                <h2 style="text-align: center;">Semana</h2>
+                <Barras id="myBarChartSemana" labels = {nombresSemana} data = {cantidadesSemana}/>
+            </div>
+        {/if}
+    {/if}
+    {#if nombresMes.length >0}
+        {#if cantidadesMes.length >0}
+            <div style="display: flex; flex-direction: column; width: 50%; height: 100%;  align-items: center">
+                <h2 style="text-align: center;">Mes</h2>
+                <Barras id="myBarChartMes" labels = {nombresMes} data = {cantidadesMes}/>
+            </div>
+        {/if}
+    {/if}
 </div>
